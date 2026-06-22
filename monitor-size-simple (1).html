@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How big is a 14 inch monitor</title>
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: #111;
+    color: #eee;
+    overflow: hidden;
+  }
+  #panel {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    background: rgba(20,20,20,0.92);
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 16px;
+    width: 260px;
+    z-index: 1000;
+  }
+  #panel h2 { font-size: 15px; margin: 0 0 10px; font-weight: 600; }
+  #panel label { font-size: 12px; color: #aaa; display: block; margin: 10px 0 4px; }
+  #panel input[type=number] {
+    width: 100%; box-sizing: border-box; padding: 6px 8px;
+    background: #000; color: #eee; border: 1px solid #555; border-radius: 6px;
+  }
+  #panel select {
+    width: 100%; padding: 6px; background: #000; color: #eee;
+    border: 1px solid #555; border-radius: 6px;
+  }
+  #panel button {
+    margin-top: 12px; width: 100%; padding: 8px; border-radius: 6px;
+    background: #2a6fdb; color: white; border: none; cursor: pointer; font-size: 13px;
+  }
+  #panel button.secondary { background: #333; margin-top: 6px; }
+  .small { font-size: 11px; color: #888; margin-top: 10px; line-height: 1.4; }
+  #toggleBtn {
+    position: fixed; bottom: 16px; left: 16px; z-index: 1001;
+    background: #222; color: #eee; border: 1px solid #555; border-radius: 6px;
+    padding: 6px 10px; font-size: 12px; cursor: pointer;
+  }
+  #box {
+    position: absolute;
+    border: 3px dashed #4caf50;
+    background: rgba(76,175,80,0.12);
+    box-sizing: border-box;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    top: 50%; left: 50%;
+  }
+  #box.overflowing { border-color: #e53935; background: rgba(229,57,53,0.12); }
+  #box2 {
+    position: absolute;
+    border: 3px dashed #ffa726;
+    background: rgba(255,167,38,0.12);
+    box-sizing: border-box;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    top: 50%; left: 50%;
+  }
+  #box2.overflowing { border-color: #e53935; background: rgba(229,57,53,0.12); }
+  #boxLabel, #boxLabel2 {
+    margin-top: 8px;
+    font-size: 14px;
+    background: rgba(0,0,0,0.6);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  #warning {
+    position: fixed; top: 16px; right: 16px; max-width: 240px;
+    background: rgba(229,57,53,0.15); border: 1px solid #e53935;
+    border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #ffb4b0;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="panel">
+  <h2>Monitor size preview</h2>
+  <label style="color:#4caf50;">Box 1 size (inches, diagonal)</label>
+  <input type="number" id="sizeInput" value="14" min="3" max="120" step="0.1">
+  <label>Aspect ratio</label>
+  <select id="aspect">
+    <option value="1.7778">16:9 (widescreen)</option>
+    <option value="1.6">16:10</option>
+    <option value="1.3333">4:3</option>
+    <option value="2.3333">21:9 (ultrawide)</option>
+  </select>
+
+  <label style="margin-top:16px; cursor:pointer;"><input type="checkbox" id="enableBox2" style="width:auto; margin-right:6px;">Compare a second size</label>
+  <div id="box2Controls" style="display:none;">
+    <label style="color:#ffa726;">Box 2 size (inches, diagonal)</label>
+    <input type="number" id="sizeInput2" value="16" min="3" max="120" step="0.1">
+    <label>Aspect ratio</label>
+    <select id="aspect2">
+      <option value="1.7778">16:9 (widescreen)</option>
+      <option value="1.6">16:10</option>
+      <option value="1.3333">4:3</option>
+      <option value="2.3333">21:9 (ultrawide)</option>
+    </select>
+  </div>
+
+  <button id="showBtn">Show it</button>
+  <button id="fullscreenBtn" class="secondary">Go fullscreen</button>
+  <div class="small">Make sure your browser zoom is at 100% (Ctrl/Cmd + 0) for this to be accurate. Press F11 or the fullscreen button to use your whole screen.</div>
+</div>
+
+<div id="warning"></div>
+<div id="box" style="display:none;">
+  <div id="boxLabel"></div>
+</div>
+<div id="box2" style="display:none;">
+  <div id="boxLabel2"></div>
+</div>
+<div id="toggleBtn">Hide panel</div>
+
+<script>
+var pxPerInch = 96;
+
+function sizeOf(diag, ratio){
+  var h = diag / Math.sqrt(ratio*ratio + 1);
+  var w = h * ratio;
+  return {w: w, h: h};
+}
+
+function drawSingle(boxEl, labelEl, diag, ratio){
+  var dims = sizeOf(diag, ratio);
+  var wPx = dims.w * pxPerInch;
+  var hPx = dims.h * pxPerInch;
+
+  boxEl.style.width = wPx + 'px';
+  boxEl.style.height = hPx + 'px';
+  boxEl.style.marginLeft = (-wPx/2) + 'px';
+  boxEl.style.marginTop = (-hPx/2) + 'px';
+  boxEl.style.display = 'flex';
+
+  var screenW = window.innerWidth;
+  var screenH = window.innerHeight;
+  var overflowing = (wPx > screenW || hPx > screenH);
+  boxEl.classList.toggle('overflowing', overflowing);
+
+  labelEl.textContent = diag + '" (' + dims.w.toFixed(1) + ' x ' + dims.h.toFixed(1) + ' in)';
+
+  return overflowing;
+}
+
+function drawBox(){
+  var diag1 = parseFloat(document.getElementById('sizeInput').value) || 1;
+  var ratio1 = parseFloat(document.getElementById('aspect').value);
+  var overflow1 = drawSingle(document.getElementById('box'), document.getElementById('boxLabel'), diag1, ratio1);
+
+  var box2Enabled = document.getElementById('enableBox2').checked;
+  var overflow2 = false;
+  var diag2 = 0;
+  var box2El = document.getElementById('box2');
+
+  if (box2Enabled) {
+    diag2 = parseFloat(document.getElementById('sizeInput2').value) || 1;
+    var ratio2 = parseFloat(document.getElementById('aspect2').value);
+    overflow2 = drawSingle(box2El, document.getElementById('boxLabel2'), diag2, ratio2);
+  } else {
+    box2El.style.display = 'none';
+  }
+
+  var warning = document.getElementById('warning');
+  var screenW = window.innerWidth;
+  var screenH = window.innerHeight;
+  var screenDiagIn = Math.sqrt(screenW*screenW + screenH*screenH) / pxPerInch;
+
+  var msgs = [];
+  if (overflow1) msgs.push(diag1 + '"');
+  if (overflow2) msgs.push(diag2 + '"');
+
+  if (msgs.length) {
+    warning.style.display = 'block';
+    warning.textContent = msgs.join(' and ') + ' bigger than your current window (roughly ' + screenDiagIn.toFixed(1) + '" diagonal at this window size). Try fullscreen or maximize the window.';
+  } else {
+    warning.style.display = 'none';
+  }
+}
+
+document.getElementById('showBtn').addEventListener('click', drawBox);
+document.getElementById('sizeInput').addEventListener('input', drawBox);
+document.getElementById('aspect').addEventListener('change', drawBox);
+document.getElementById('sizeInput2').addEventListener('input', drawBox);
+document.getElementById('aspect2').addEventListener('change', drawBox);
+document.getElementById('enableBox2').addEventListener('change', function(){
+  document.getElementById('box2Controls').style.display = this.checked ? 'block' : 'none';
+  drawBox();
+});
+window.addEventListener('resize', drawBox);
+
+document.getElementById('fullscreenBtn').addEventListener('click', function(){
+  var el = document.documentElement;
+  var req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (req) {
+    var result = req.call(el);
+    if (result && result.catch) {
+      result.catch(function(err){
+        alert('Fullscreen was blocked by your browser (this can happen on local files). Press F11 (Windows) or Ctrl+Cmd+F (Mac) instead to go fullscreen manually.');
+      });
+    }
+  } else {
+    alert('Fullscreen is not supported here. Press F11 (Windows) or Ctrl+Cmd+F (Mac) instead.');
+  }
+  setTimeout(drawBox, 300);
+});
+document.addEventListener('fullscreenchange', drawBox);
+document.addEventListener('webkitfullscreenchange', drawBox);
+
+var panelHidden = false;
+document.getElementById('toggleBtn').addEventListener('click', function(){
+  panelHidden = !panelHidden;
+  document.getElementById('panel').style.display = panelHidden ? 'none' : 'block';
+  this.textContent = panelHidden ? 'Show panel' : 'Hide panel';
+});
+
+drawBox();
+</script>
+
+</body>
+</html>
